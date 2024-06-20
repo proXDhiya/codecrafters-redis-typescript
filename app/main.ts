@@ -9,14 +9,14 @@ const server: net.Server = net.createServer((connection: net.Socket) => {
         const commands: string[] = commendParser(data);
 
         // use regex to parse the command
-        if (commands[0].match(/ping/gim)) return connection.write("+PONG\r\n");
-        if (commands[0].match(/echo/gim)) return connection.write(`+${commands[1]}\r\n`);
-        if (commands[0].match(/set/gim)) {
+        if (commands[0].match(/PING/gim)) return connection.write("+PONG\r\n");
+        if (commands[0].match(/ECHO/gim)) return connection.write(`+${commands[1]}\r\n`);
+        if (commands[0].match(/SET/gim)) {
             memory.set(commands[1], commands[2]);
 
-            if (commands[3] === "EX" || commands[3] === "PX") {
+            if (commands[3].match(/EX|PX/gim)) {
                 const expire: number = parseInt(commands[4]) || 0;
-                const time: number = commands[3] === "EX" ? expire * 1000 : expire;
+                const time: number = commands[3].match(/EX/gim) ? expire * 1000 : expire;
                 setTimeout(() => memory.delete(commands[1]), time);
             }
 
