@@ -23,6 +23,7 @@ function commendMap(con: net.Socket, com: string[], memory: Map<string, string>)
 
         return con.write("+ERROR\r\n");
     } catch (err) {
+        console.error('Error in commend map', err)
         con.write(`-ERR ${err.message}\r\n`);
     }
 }
