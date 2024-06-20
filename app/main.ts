@@ -13,11 +13,19 @@ const server: net.Server = net.createServer((connection: net.Socket) => {
         if (commands[0].match(/echo/gim)) return connection.write(`+${commands[1]}\r\n`);
         if (commands[0].match(/set/gim)) {
             memory.set(commands[1], commands[2]);
+
+            if (commands[3] === "EX" || commands[3] === "PX") {
+                const expire: number = parseInt(commands[4]) || 0;
+                const time: number = commands[3] === "EX" ? expire * 1000 : expire;
+                setTimeout(() => memory.delete(commands[1]), time);
+            }
+
             return connection.write("+OK\r\n");
         }
         if (commands[0].match(/get/gim)) {
             const value: string | undefined = memory.get(commands[1]);
-            return connection.write(`+${value}\r\n`);
+            const response: string = value ? `+${value}\r\n` : "$-1\r\n";
+            return connection.write(response);
         }
 
         connection.write("+ERROR\r\n");
