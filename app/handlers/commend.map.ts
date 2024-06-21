@@ -1,6 +1,6 @@
 import * as net from "net";
 
-function commendMap(con: net.Socket, com: string[], memory: Map<string, string>) {
+function commendMap(con: net.Socket, com: string[], memory: Map<string, string>, args: any): net.Socket {
     try {
         if (com[0].match(/PING/gim)) return con.write("+PONG\r\n");
         if (com[0].match(/ECHO/gim)) return con.write(`+${com[1]}\r\n`);
@@ -18,6 +18,17 @@ function commendMap(con: net.Socket, com: string[], memory: Map<string, string>)
         if (com[0].match(/get/gim)) {
             const value: string | undefined = memory.get(com[1]);
             const response: string = value ? `+${value}\r\n` : "$-1\r\n";
+            return con.write(response);
+        }
+
+        // CONFIG GET
+        if (com[0].match(/CONFIG/gim) && com[1].match(/GET/gim)) {
+            const rdp: string = com[2];
+
+            const rdpValue: string | undefined = args.get(rdp);
+            const response: string = !rdpValue ?
+                "$-1\r\n" :
+                `*2\r\n$${rdp.length}\r\n${rdp}\r\n$${rdpValue.length}\r\n${rdpValue}\r\n`;
             return con.write(response);
         }
 
